@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kabuda's Kitchen - Login</title>
+  <link rel="stylesheet" href="https://kit.fontawesome.com/339e51836c.css" crossorigin="anonymous">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #20b2aa;
+      --card: #e1f7f5;
+      --text: #222;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --fg: #20b2aa;
+      --card: #2a3e3e;
+      --text: #f1f1f1;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      font-family: 'Tektur', cursive;
+      box-sizing: border-box;
+    }
+
+    body {
+      background-color: var(--bg);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      min-height: 100vh;
+      color: var(--text);
+    }
+
+    .sidebar-wrapper {
+      width: 400px;
+      padding: 20px;
+      background-color: transparent;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      right: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 2em;
+      color: var(--fg);
+      margin-bottom: 40px;
+      text-align: center;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .form-box {
+      width: 100%;
+      background-color: var(--card);
+      padding: 30px 20px;
+      border-radius: 20px;
+      box-shadow: 0px 15px 30px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      transform: translateY(-20px);
+    }
+
+    .form-box:hover {
+      transform: translateY(-25px);
+      box-shadow: 0px 20px 35px rgba(0, 0, 0, 0.15);
+    }
+
+    .form-box h2 {
+      font-size: 2em;
+      color: var(--fg);
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .input-box {
+      position: relative;
+      width: 100%;
+      height: 50px;
+      border-bottom: 2px solid var(--fg);
+      margin: 30px 0 10px;
+    }
+
+    .input-box input {
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      border: none;
+      outline: none;
+      font-size: 1em;
+      color: var(--fg);
+      font-weight: 600;
+      padding: 0 35px 0 5px;
+    }
+
+    .input-box label {
+      position: absolute;
+      top: 50%;
+      left: 5px;
+      transform: translateY(-50%);
+      font-size: 1em;
+      color: var(--fg);
+      font-weight: 500;
+      pointer-events: none;
+      transition: 0.5s;
+    }
+
+    .input-box input:focus ~ label,
+    .input-box input:valid ~ label {
+      top: -5px;
+    }
+
+    .input-box .icon {
+      position: absolute;
+      right: 8px;
+      font-size: 1.2em;
+      color: var(--fg);
+      line-height: 57px;
+    }
+
+    .remember-forgot {
+      font-size: 0.9em;
+      color: var(--fg);
+      font-weight: 500;
+      margin: 0 0 15px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .remember-forgot a {
+      color: var(--fg);
+      text-decoration: none;
+    }
+
+    .remember-forgot a:hover {
+      text-decoration: underline;
+    }
+
+    .btn {
+      width: 100%;
+      height: 45px;
+      background: var(--fg);
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1em;
+      color: #fff;
+      font-weight: 500;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #188f8a;
+    }
+
+    .login-msg {
+      font-size: 0.9em;
+      text-align: center;
+      font-weight: 500;
+      margin-top: 15px;
+    }
+
+    .error {
+      color: red;
+    }
+
+    .success {
+      color: green;
+    }
+  </style>
+</head>
+<body data-theme="light">
+  <div class="sidebar-wrapper">
+    <h2 class="logo">Kabuda's Kitchen</h2>
+    <div class="form-box login">
+      <h2>Login</h2>
+      <form id="loginForm">
+        <div class="input-box">
+          <span class="icon"><i class="fa-solid fa-id-badge"></i></span>
+          <input type="text" id="userID" required />
+          <label>User ID</label>
+        </div>
+        <div class="input-box">
+          <span class="icon"><i class="fa-solid fa-lock"></i></span>
+          <input type="password" id="password" required />
+          <label>Password</label>
+        </div>
+        <div class="remember-forgot">
+          <label><input type="checkbox" /> Remember me</label>
+          <a href="#">Forgot password?</a>
+        </div>
+        <button type="submit" class="btn">Login</button>
+        <p class="login-msg" id="loginMessage"></p>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('loginForm');
+    const loginMessage = document.getElementById('loginMessage');
+    const userIDInput = document.getElementById('userID');
+    const passwordInput = document.getElementById('password');
+
+    const validUsers = [
+      { id: "john123", password: "pass123" },
+      { id: "admin01", password: "adminpass" },
+      { id: "clerk002", password: "clerkpass" }
+    ];
+
+    function showMessage(msg, isError = true) {
+      loginMessage.textContent = msg;
+      loginMessage.className = isError ? 'login-msg error' : 'login-msg success';
+    }
+
+    function validateInput(userID, password) {
+      if (!userID || !password) {
+        showMessage("Both ID and password are required.");
+        return false;
+      }
+
+      const userIDPattern = /^[a-zA-Z0-9_]+$/;
+      if (!userIDPattern.test(userID)) {
+        showMessage("User ID must be alphanumeric.");
+        return false;
+      }
+
+      if (password.length < 4) {
+        showMessage("Password must be at least 4 characters long.");
+        return false;
+      }
+
+      return true;
+    }
+
+    function verifyCredentials(userID, password) {
+      return validUsers.find(user => user.id === userID && user.password === password);
+    }
+
+    userIDInput.addEventListener('input', () => {
+      if (userIDInput.value && !/^[a-zA-Z0-9_]+$/.test(userIDInput.value)) {
+        showMessage("User ID must be alphanumeric.");
+      } else {
+        loginMessage.textContent = "";
+      }
+    });
+
+    passwordInput.addEventListener('input', () => {
+      if (passwordInput.value && passwordInput.value.length < 4) {
+        showMessage("Password must be at least 4 characters.");
+      } else {
+        loginMessage.textContent = "";
+      }
+    });
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+
+      const userID = userIDInput.value.trim();
+      const password = passwordInput.value;
+
+      if (!validateInput(userID, password)) return;
+
+      const matchedUser = verifyCredentials(userID, password);
+      if (matchedUser) {
+        showMessage("Login successful. Redirecting...", false);
+        setTimeout(() => {
+          window.location.href = "SC_dshd.html";
+        }, 1500);
+      } else {
+        showMessage("Invalid ID or password.");
+      }
+    });
+  </script>
+</body>
+</html>
