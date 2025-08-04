@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kabuda's Kitchen POS</title>
+  <link rel="stylesheet" href="https://kit.fontawesome.com/339e51836c.css" crossorigin="anonymous">
+  <link rel="shortcut icon" href="Restaurant_Logo_Design_Ideas_for_Your_Brand_-_Karen_Johsnon-removebg-preview.png"/>
+
+  <style>
+    :root {
+      --bg: #ffffff;
+      --fg: #20b2aa;
+      --card: #e1f7f5;
+      --text: #222;
+    }
+
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --fg: #20b2aa;
+      --card: #2a3e3e;
+      --text: #f1f1f1;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Tektur', cursive;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      height: 100%;
+      overflow: hidden;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      background: var(--fg);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+      z-index: 100;
+    }
+
+    header img {
+      height: 70px;
+    }
+
+    .main {
+      display: flex;
+      height: calc(100vh - 70px);
+      margin-top: 70px;
+    }
+
+    .sidebar {
+      width: 60px;
+      background: var(--card);
+      padding-top: 20px;
+      transition: width 0.3s ease;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .sidebar:hover {
+      width: 200px;
+      align-items: flex-start;
+    }
+
+    .sidebar-top, .sidebar-bottom {
+      width: 100%;
+    }
+
+    .menu-item {
+      display: flex;
+      align-items: center;
+      width: 100%;
+      padding: 15px;
+      font-weight: bold;
+      white-space: nowrap;
+      cursor: pointer;
+      color: var(--text);
+      text-decoration: none;
+    }
+
+    .menu-item i {
+      min-width: 25px;
+      margin-right: 10px;
+      text-align: center;
+      color: var(--fg);
+    }
+
+    .menu-item:hover,
+    .menu-item.active {
+      background: rgba(0, 0, 0, 0.05);
+    }
+
+    .menu-text {
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .sidebar:hover .menu-text {
+      opacity: 1;
+    }
+
+    .menu-item a {
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      width: 100%;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .menu-card {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+      cursor: pointer;
+    }
+
+    .menu-card img {
+      width: 100%;
+      height: 130px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .menu-card h4 {
+      margin: 10px 0 5px;
+      color: var(--fg);
+      text-align: center;
+    }
+
+    .sidebar .theme-toggle, .sidebar .logout-btn {
+      background-color: var(--fg);
+      border: none;
+      color: white;
+      font-weight: bold;
+      width: 100%;
+      padding: 10px;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .logout-btn a {
+      color: white;
+      text-decoration: none;
+      display: block;
+    }
+
+    .order-popup {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: 340px;
+      background: var(--card);
+      border-radius: 10px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+      padding: 20px;
+      display: none;
+      z-index: 99;
+    }
+
+    .order-popup h3 {
+      margin-bottom: 10px;
+    }
+
+    .cart-items {
+      max-height: 160px;
+      overflow-y: auto;
+      margin-bottom: 10px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px dashed #aaa;
+      padding: 5px 0;
+    }
+
+    .cart-item .remove {
+      color: red;
+      margin-left: 10px;
+      cursor: pointer;
+    }
+
+    .total {
+      font-weight: bold;
+      text-align: right;
+      margin-bottom: 10px;
+    }
+
+    select, input, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      background-color: var(--fg);
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      background: none;
+      border: none;
+      font-size: 1.2em;
+      cursor: pointer;
+    }
+
+    .loader, .success-icon {
+      display: none;
+      text-align: center;
+      font-size: 1.5em;
+      margin-top: 10px;
+    }
+
+    .loader { color: orange; }
+    .success-icon { color: green; }
+
+    #phoneNumber { display: none; }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <img src="Logótipo_de_localização_com_design_de_talheres___Vetor_Premium-removebg-preview.png" alt="Logo">
+  </header>
+
+  <!-- MAIN BODY -->
+  <div class="main">
+    <div class="sidebar">
+      <div class="sidebar-top">
+        <div class="menu-item active"><i class="fas fa-utensils"></i> <span class="menu-text">Take Order</span></div>
+        <a href="vors.html" class="menu-item"><i class="fas fa-list"></i><span class="menu-text">View Orders</span></a>
+        <div class="menu-item"><i class="fas fa-chart-line"></i> <span class="menu-text">Reports</span></div>
+      </div>
+      <div class="sidebar-bottom">
+        <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+        <button class="logout-btn"><a href="login.html">Logout</a></button>
+      </div>
+    </div>
+
+    <div class="content" id="menuGrid"></div>
+  </div>
+
+  <!-- ORDER POPUP -->
+  <div class="order-popup" id="orderPopup">
+    <button class="close-btn" onclick="closePopup()">×</button>
+    <h3>Customer Order</h3>
+    <div class="cart-items" id="cartItems"></div>
+    <div class="total" id="totalCost">Total: KES 0</div>
+    <select id="paymentMethod" onchange="togglePhoneInput()">
+      <option value="mpesa">M-Pesa</option>
+      <option value="cash">Cash</option>
+      <option value="card">Card</option>
+    </select>
+    <input type="tel" id="phoneNumber" placeholder="Customer Phone">
+    <button onclick="submitPayment()">Complete Payment</button>
+    <div class="loader" id="loader">Processing...</div>
+    <div class="success-icon" id="successIcon">✔ Payment Successful</div>
+  </div>
+
+  <script>
+    const menu = [
+      { id: 1, name: 'Pilau', price: 150, image: 'https://via.placeholder.com/200x130?text=Pilau' },
+      { id: 2, name: 'Fish', price: 250, image: 'https://via.placeholder.com/200x130?text=Fish' },
+      { id: 3, name: 'Ugali & Sukuma', price: 100, image: 'https://via.placeholder.com/200x130?text=Ugali' }
+    ];
+
+    const cart = [];
+
+    const menuGrid = document.getElementById('menuGrid');
+    const cartItems = document.getElementById('cartItems');
+    const totalCost = document.getElementById('totalCost');
+    const orderPopup = document.getElementById('orderPopup');
+    const phoneInput = document.getElementById('phoneNumber');
+    const loader = document.getElementById('loader');
+    const successIcon = document.getElementById('successIcon');
+
+    function toggleTheme() {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    }
+
+    function togglePhoneInput() {
+      phoneInput.style.display = document.getElementById('paymentMethod').value === 'mpesa' ? 'block' : 'none';
+    }
+
+    function openPopup(item) {
+      cartItems.innerHTML = '';
+      const quantityField = document.createElement('input');
+      quantityField.type = 'number';
+      quantityField.min = 1;
+      quantityField.value = 1;
+
+      const addBtn = document.createElement('button');
+      addBtn.textContent = "Add to Order";
+      addBtn.onclick = () => {
+        const qty = parseInt(quantityField.value);
+        if (qty < 1) return alert("Invalid quantity");
+        cart.push({ ...item, quantity: qty });
+        updateCart();
+        quantityField.value = 1;
+      };
+
+      const info = document.createElement('div');
+      info.innerHTML = `<strong>${item.name}</strong> - KES ${item.price}`;
+      cartItems.appendChild(info);
+      cartItems.appendChild(quantityField);
+      cartItems.appendChild(addBtn);
+      orderPopup.style.display = 'block';
+    }
+
+    function updateCart() {
+      cartItems.innerHTML = '';
+      let total = 0;
+      cart.forEach((item, index) => {
+        const line = document.createElement('div');
+        line.className = 'cart-item';
+        line.innerHTML = `
+          <span>${item.name} x${item.quantity}</span>
+          <span>KES ${item.price * item.quantity} <span class="remove" onclick="removeFromCart(${index})">❌</span></span>
+        `;
+        cartItems.appendChild(line);
+        total += item.price * item.quantity;
+      });
+      totalCost.textContent = `Total: KES ${total}`;
+    }
+
+    function removeFromCart(index) {
+      cart.splice(index, 1);
+      updateCart();
+    }
+
+    function closePopup() {
+      orderPopup.style.display = 'none';
+    }
+
+    async function submitPayment() {
+      loader.style.display = 'block';
+      successIcon.style.display = 'none';
+
+      const method = document.getElementById('paymentMethod').value;
+      const phone = phoneInput.value;
+
+      if (method === 'mpesa' && (!phone || phone.length < 10)) {
+        loader.style.display = 'none';
+        return alert('Enter valid phone number');
+      }
+
+      await new Promise(resolve => setTimeout(resolve, 3000));
+
+      loader.style.display = 'none';
+      successIcon.style.display = 'block';
+
+      setTimeout(() => {
+        window.print();
+        cart.length = 0;
+        updateCart();
+        closePopup();
+        successIcon.style.display = 'none';
+      }, 2000);
+    }
+
+    menu.forEach(item => {
+      const card = document.createElement('div');
+      card.className = 'menu-card';
+      card.innerHTML = `<img src="${item.image}"><h4>${item.name} - KES ${item.price}</h4>`;
+      card.onclick = () => openPopup(item);
+      menuGrid.appendChild(card);
+    });
+  </script>
+</body>
+</html>
