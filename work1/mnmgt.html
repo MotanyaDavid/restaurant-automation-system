@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Manage Menu - Kabuda's Kitchen</title>
+  <link rel="stylesheet" href="https://kit.fontawesome.com/339e51836c.css"/>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <link rel="shortcut icon" href="Restaurant_Logo_Design_Ideas_for_Your_Brand_-_Karen_Johsnon-removebg-preview.png"/>
+
+  <style>
+    :root {
+      --bg: #fff;
+      --fg: #20b2aa;
+      --card: #e1f7f5;
+      --text: #222;
+    }
+    [data-theme="dark"] {
+      --bg: #1e1e1e;
+      --fg: #20b2aa;
+      --card: #2a3e3e;
+      --text: #f1f1f1;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    body {
+      display: flex;
+    }
+
+    .sidebar {
+      width: 60px;
+      background: var(--fg);
+      padding-top: 10px;
+      transition: width 0.3s;
+      overflow: hidden;
+      height: 100vh;
+      position: fixed;
+      top: 0;
+      left: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .sidebar:hover {
+      width: 200px;
+    }
+
+    .sidebar img {
+      height: 60px;
+      margin: 10px auto;
+      display: block;
+    }
+
+    .menu-item {
+      padding: 15px;
+      color: white;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+
+    .menu-item.active {
+      background: #1e8880;
+    }
+
+    .sidebar-bottom {
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-toggle, .logout-btn {
+      background: white;
+      color: var(--fg);
+      padding: 8px 14px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      text-align: center;
+      width: 100%;
+    }
+
+    .logout-btn a {
+      color: var(--fg);
+      text-decoration: none;
+    }
+
+    .content {
+      margin-left: 60px;
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+      height: 100vh;
+      transition: margin-left 0.3s;
+    }
+
+    .sidebar:hover ~ .content {
+      margin-left: 200px;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--fg);
+    }
+
+    .theme-toggle,
+    .export-btn {
+      background: var(--fg);
+      color: white;
+      padding: 10px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    input, select, button {
+      padding: 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+      width: 100%;
+    }
+
+    .menu-list .menu-item-box {
+      background: var(--card);
+      border-radius: 10px;
+      padding: 15px;
+      display: flex;
+      gap: 15px;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .menu-item-box img {
+      width: 100px;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+
+    .menu-item-box .actions {
+      margin-left: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .menu-item-box button {
+      border: none;
+      padding: 6px 10px;
+      border-radius: 5px;
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .edit-btn { background: var(--fg); }
+    .delete-btn { background: crimson; }
+    .avail-checkbox { margin-left: auto; }
+
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100vw; height: 100vh;
+      background: rgba(0, 0, 0, 0.5);
+      display: none;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: var(--card);
+      padding: 20px;
+      width: 400px;
+      border-radius: 10px;
+      position: relative;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 1.5em;
+      cursor: pointer;
+      color: var(--fg);
+    }
+
+    #addItemForm {
+      display: none;
+      margin-bottom: 20px;
+    }
+
+    .show-form-btn {
+      background: var(--fg);
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 6px;
+      cursor: pointer;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="sidebar">
+    <div>
+      <img src="Logótipo_de_localização_com_design_de_talheres___Vetor_Premium-removebg-preview.png" alt="Logo">
+      <div class="menu-item"><i class="fas fa-tachometer-alt"></i><span class="menu-text">Dashboard</span></div>
+      <a href="usmgmnt.html" class="menu-item"><i class="fas fa-users-cog"></i><span class="menu-text">Manage Users</span></a>
+      <div class="menu-item active"><i class="fas fa-utensils"></i><span class="menu-text">Manage Menu</span></div>
+      <div class="menu-item"><i class="fas fa-boxes"></i><span class="menu-text">Stock Management</span></div>
+      <div class="menu-item"><i class="fas fa-chart-line"></i><span class="menu-text">Generate Reports</span></div>
+    </div>
+    <div class="sidebar-bottom">
+      <button class="theme-toggle" onclick="toggleTheme()">🌓 Theme</button>
+      <button class="logout-btn"><a href="login.html">Logout</a></button>
+    </div>
+  </div>
+
+  <div class="content">
+    <div class="topbar">
+      <h1>Menu Management</h1>
+      <div>
+        <button class="export-btn" onclick="exportExcel()">Export Excel</button>
+        <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+      </div>
+    </div>
+
+    <input type="text" id="searchInput" placeholder="Search...">
+    <select id="sortSelect">
+      <option value="default">Sort by...</option>
+      <option value="price-asc">Price: Low→High</option>
+      <option value="price-desc">Price: High→Low</option>
+      <option value="prep-asc">Prep: Short→Long</option>
+      <option value="prep-desc">Prep: Long→Short</option>
+    </select>
+    <button class="show-form-btn" onclick="toggleAddForm()">+ Add Item</button>
+
+    <form id="addItemForm">
+      <input type="text" id="name" placeholder="Name">
+      <input type="text" id="description" placeholder="Description">
+      <input type="text" id="category" placeholder="Category">
+      <input type="text" id="menu" placeholder="Menu (e.g. Lunch)">
+      <input type="number" id="price" placeholder="Price (KSH)">
+      <input type="number" id="preparationTime" placeholder="Prep Time (min)">
+      <label><input type="checkbox" id="available"> Available</label>
+      <input type="file" id="image">
+      <button type="button" onclick="addItem()">Save Item</button>
+    </form>
+
+    <div id="menuList" class="menu-list"></div>
+  </div>
+
+  <div class="modal" id="editModal">
+    <div class="modal-content">
+      <span class="close-btn" onclick="closeModal()">×</span>
+      <h3>Edit Menu Item</h3>
+      <form id="editForm">
+        <input type="hidden" id="editId">
+        <input type="text" id="editName" placeholder="Name">
+        <input type="text" id="editDesc" placeholder="Description">
+        <input type="text" id="editCat" placeholder="Category">
+        <input type="text" id="editMenu" placeholder="Menu">
+        <input type="number" id="editPrice" placeholder="Price">
+        <input type="number" id="editPrep" placeholder="Prep Time">
+        <label><input type="checkbox" id="editAvail"> Available</label>
+        <input type="file" id="editImage">
+        <button type="button" onclick="saveEdit()">Update</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const menuList = document.getElementById('menuList');
+    let items = JSON.parse(localStorage.getItem('restaurantMenu')) || [];
+    let editingId = null;
+
+    function toggleTheme() {
+      const cur = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', cur === 'dark' ? 'light' : 'dark');
+    }
+
+    function toggleAddForm(){
+      const f = document.getElementById('addItemForm');
+      f.style.display = f.style.display === 'block' ? 'none' : 'block';
+    }
+
+    function display(list = items){
+      menuList.innerHTML = "";
+      list.forEach(i => {
+        const div = document.createElement('div');
+        div.className = 'menu-item-box';
+        div.innerHTML = `
+          <img src="${i.img || 'https://via.placeholder.com/100?text=' + encodeURIComponent(i.name)}">
+          <div>
+            <h4>${i.name}</h4>
+            <p>${i.desc}</p>
+            <p>KSH ${i.price} | ${i.category} | ${i.menu}</p>
+            <p>Prep: ${i.preparationTime} min</p>
+          </div>
+          <input type="checkbox" class="avail-checkbox" ${i.available ? 'checked' : ''} onchange="toggleAvail(${i.id},this.checked)"> Available
+          <div class="actions">
+            <button class="edit-btn" onclick="openEdit(${i.id})">Edit</button>
+            <button class="delete-btn" onclick="deleteItem(${i.id})">Delete</button>
+          </div>`;
+        menuList.appendChild(div);
+      });
+      localStorage.setItem('restaurantMenu', JSON.stringify(items));
+    }
+
+    function toggleAvail(id, state){
+      const it = items.find(x => x.id === id);
+      if(it) it.available = state;
+      display();
+    }
+
+    function addItem(){
+      const newI = {
+        id: Date.now(),
+        name: document.getElementById('name').value,
+        desc: document.getElementById('description').value,
+        category: document.getElementById('category').value,
+        menu: document.getElementById('menu').value,
+        price: parseFloat(document.getElementById('price').value),
+        preparationTime: parseInt(document.getElementById('preparationTime').value),
+        available: document.getElementById('available').checked,
+        img: ""
+      };
+      const f = document.getElementById('image').files[0];
+      if(f){
+        const reader = new FileReader();
+        reader.onload = e => { newI.img = e.target.result; items.push(newI); display(); };
+        reader.readAsDataURL(f);
+      } else {
+        items.push(newI); display();
+      }
+      document.getElementById('addItemForm').reset();
+      toggleAddForm();
+    }
+
+    function openEdit(id){
+      const i = items.find(x => x.id === id); if(!i) return;
+      editingId = id;
+      document.getElementById('editName').value = i.name;
+      document.getElementById('editDesc').value = i.desc;
+      document.getElementById('editCat').value = i.category;
+      document.getElementById('editMenu').value = i.menu;
+      document.getElementById('editPrice').value = i.price;
+      document.getElementById('editPrep').value = i.preparationTime;
+      document.getElementById('editAvail').checked = i.available;
+      document.getElementById('editModal').style.display = 'flex';
+    }
+
+    function saveEdit(){
+      const i = items.find(x => x.id === editingId); if(!i) return;
+      i.name = document.getElementById('editName').value;
+      i.desc = document.getElementById('editDesc').value;
+      i.category = document.getElementById('editCat').value;
+      i.menu = document.getElementById('editMenu').value;
+      i.price = parseFloat(document.getElementById('editPrice').value);
+      i.preparationTime = parseInt(document.getElementById('editPrep').value);
+      i.available = document.getElementById('editAvail').checked;
+      const f = document.getElementById('editImage').files[0];
+      if(f){
+        const reader = new FileReader();
+        reader.onload = e => { i.img = e.target.result; display(); };
+        reader.readAsDataURL(f);
+      } else display();
+      closeModal();
+    }
+
+    function closeModal(){
+      document.getElementById('editModal').style.display = 'none';
+    }
+
+    function deleteItem(id){
+      items = items.filter(x => x.id !== id);
+      display();
+    }
+
+    document.getElementById('searchInput').addEventListener('input', e => {
+      const q = e.target.value.toLowerCase();
+      const fl = items.filter(x =>
+        x.name.toLowerCase().includes(q) ||
+        x.desc.toLowerCase().includes(q) ||
+        x.category.toLowerCase().includes(q)
+      );
+      display(fl || items);
+    });
+
+    document.getElementById('sortSelect').addEventListener('change', e => {
+      const v = e.target.value;
+      let sorted = [...items];
+      if (v === 'price-asc') sorted.sort((a,b) => a.price - b.price);
+      if (v === 'price-desc') sorted.sort((a,b) => b.price - a.price);
+      if (v === 'prep-asc') sorted.sort((a,b) => a.preparationTime - b.preparationTime);
+      if (v === 'prep-desc') sorted.sort((a,b) => b.preparationTime - a.preparationTime);
+      display(sorted);
+    });
+
+    function exportExcel(){
+      const ws_data = [
+        ['Name','Description','Category','Menu','Price','Prep Time','Available']
+      ];
+      items.forEach(i => {
+        ws_data.push([i.name, i.desc, i.category, i.menu, i.price, i.preparationTime, i.available]);
+      });
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.aoa_to_sheet(ws_data);
+      XLSX.utils.book_append_sheet(wb, ws, "Menu");
+      XLSX.writeFile(wb, 'menu_export.xlsx');
+    }
+
+    display();
+  </script>
+</body>
+</html>
